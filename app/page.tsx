@@ -22,7 +22,7 @@ export default function Home() {
             Coming <span className="text-emerald-600">Soon</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Jamaica's premier resale marketplace is almost here. Buy, sell, and discover amazing pre-loved items from across the island.
+            Jamaica&apos;s premier resale marketplace is almost here. Buy, sell, and discover amazing pre-loved items from across the island.
           </p>
         </div>
 
