@@ -23,7 +23,7 @@ const dirname = path.dirname(filename)
 
 // SSL configuration for Supabase
 const getDatabaseConfig = () => {
-  const connectionString = process.env.POSTGRES_URL || ''
+  const connectionString = process.env.DATABASE_URI || ''
   
   // Try to use the Supabase root certificate first (works for both local and production)
   const certPath = path.resolve(dirname, '..', 'supabase-ca.pem')
