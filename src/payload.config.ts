@@ -5,6 +5,7 @@ import sharp from 'sharp' // sharp-import
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
+import fs from 'fs'
 
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
@@ -19,6 +20,39 @@ import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+// SSL configuration for Supabase
+const getDatabaseConfig = () => {
+  const connectionString = process.env.POSTGRES_URL || ''
+  
+  // Try to use the Supabase root certificate first (works for both local and production)
+  const certPath = path.resolve(dirname, '..', 'supabase-ca.pem')
+  if (fs.existsSync(certPath)) {
+    return {
+      pool: {
+        connectionString,
+      },
+      ssl: { ca: fs.readFileSync(certPath, 'utf8') }
+    }
+  }
+  
+  // For local/dev environment without certificate, or if PGSSLMODE is set to no-verify
+  if (process.env.NODE_ENV === 'development' || process.env.PGSSLMODE === 'no-verify') {
+    return {
+      pool: {
+        connectionString,
+      },
+      ssl: { rejectUnauthorized: false }
+    }
+  }
+  
+  // Fallback configuration (no SSL)
+  return {
+    pool: {
+      connectionString,
+    },
+  }
+}
 
 export default buildConfig({
   admin: {
@@ -59,11 +93,7 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: postgresAdapter({
-    pool: {
-      connectionString: process.env.POSTGRES_URL || '',
-    },
-  }),
+  db: postgresAdapter(getDatabaseConfig()),
   collections: [Pages, Posts, Media, Categories, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
